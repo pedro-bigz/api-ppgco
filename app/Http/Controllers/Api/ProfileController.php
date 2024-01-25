@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\UnauthorizedException;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -65,25 +66,30 @@ class ProfileController extends Controller
     public function updateProfile(Request $request)
     {
         $this->setUser($request);
-        $adminUser = $this->adminUser;
 
         // Validate the request
         $this->validate($request, [
             'first_name' => ['nullable', 'string'],
             'last_name' => ['nullable', 'string'],
+            'password' => ['required', 'string'],
             'email' => ['sometimes', 'email', Rule::unique('admin_users', 'email')->ignore($this->adminUser->getKey(), $this->adminUser->getKeyName()), 'string'],
             'language' => ['sometimes', 'string'],
             
         ]);
+
+        $password = $request->get('password');
 
         // Sanitize input
         $sanitized = $request->only([
             'first_name',
             'last_name',
             'email',
-            'language',
-            
+            'language',            
         ]);
+
+        if (!Hash::check($password, $this->adminUser->password)) {
+            throw new UnauthorizedException('Senha incorreta', 400);
+        }
 
         // Update changed values AdminUser
         $this->adminUser->update($sanitized);

@@ -24,6 +24,7 @@ use Illuminate\Http\Response;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Config;
 use Illuminate\View\View;
+use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 
 class AdminUsersController extends Controller
 {
@@ -65,11 +66,7 @@ class AdminUsersController extends Controller
             ['id', 'first_name', 'last_name', 'email', 'language']
         );
 
-        if ($request->ajax()) {
-            return ['data' => $data, 'activation' => Config::get('admin-auth.activation_enabled')];
-        }
-
-        return view('admin.admin-user.index', ['data' => $data, 'activation' => Config::get('admin-auth.activation_enabled')]);
+        return ['data' => $data, 'activation' => Config::get('admin-auth.activation_enabled')];
     }
 
     /**
@@ -89,11 +86,7 @@ class AdminUsersController extends Controller
         // But we do have a roles, so we need to attach the roles to the adminUser
         $adminUser->roles()->sync(collect($request->input('roles', []))->map->id->toArray());
 
-        if ($request->ajax()) {
-            return ['redirect' => url('admin/admin-users'), 'message' => trans('brackets/admin-ui::admin.operation.succeeded')];
-        }
-
-        return redirect('admin/admin-users');
+        return ['user' => $adminUser, 'message' => trans('brackets/admin-ui::admin.operation.succeeded')];
     }
 
     /**
@@ -107,7 +100,7 @@ class AdminUsersController extends Controller
     {
         $this->authorize('admin.admin-user.show', $adminUser);
 
-        return $adminUser;
+        return ['user' => $adminUser];
     }
 
     /**
@@ -131,10 +124,10 @@ class AdminUsersController extends Controller
         }
 
         if ($request->ajax()) {
-            return ['redirect' => url('admin/admin-users'), 'message' => trans('brackets/admin-ui::admin.operation.succeeded')];
+            return ['message' => trans('brackets/admin-ui::admin.operation.succeeded')];
         }
 
-        return redirect('admin/admin-users');
+        return ['message' => trans('brackets/admin-ui::admin.operation.succeeded')];
     }
 
     /**

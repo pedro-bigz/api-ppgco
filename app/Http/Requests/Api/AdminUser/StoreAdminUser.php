@@ -32,7 +32,7 @@ class StoreAdminUser extends FormRequest
             'last_name' => ['nullable', 'string'],
             'email' => ['required', 'email', Rule::unique('admin_users', 'email'), 'string'],
             'password' => ['required', 'confirmed', 'min:7', 'regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9]).*$/', 'string'],
-            // 'password_confirm' => 'required|same:password',
+            'password_confirm' => 'required|same:password',
             'forbidden' => ['required', 'boolean'],
             'language' => ['required', 'string'],
                 
